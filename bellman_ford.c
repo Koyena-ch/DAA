@@ -1,77 +1,73 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
+#include<stdio.h>
+#include<stdlib.h>
 
-struct Edge 
-{
-	int source, destination, weight;
+struct Edge{
+    int u, v, w;
 };
+typedef struct Edge Edge;
 
-struct Graph 
-{
-	int V, E;
-    	struct Edge* edge;
-};
-
-struct Graph* createGraph(int V, int E) 
-{
-    	struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
-  	graph->V = V;
-    	graph->E = E;
-    	graph->edge = (struct Edge*)malloc(E * sizeof(struct Edge));
-    	return graph;
+void bFord(Edge e[], int d[], int pi[], int s, int v, int ed){
+    for(int i=1;i<v;i++){
+        d[i]=INT_MAX;
+        pi[i]=i;
+    }
+    d[s]=0;
+    for(int i=1;i<v-1;i++)
+        for(int j=0;j<ed;j++){
+            if(d[e[j].u]!=INT_MAX && (d[e[j].u] + e[j].w)<d[e[j].v]){
+                d[e[j].v]=d[e[j].u] + e[j].w;
+                pi[e[j].v]=e[j].u;
+            }
+        }
 }
 
-void printDistance(int distance[], int V) 
-{
-    	printf("Vertex    Distance from Source\n");
-    	for (int i = 0; i < V; ++i)
-      		printf("%d\t\t%d\n", i, distance[i]);
+void printA(int a[],int n){
+    printf("\n");
+    for(int i=1;i<n;i++)
+        printf("%d ",a[i]);
+    printf("\n");
 }
 
-void BellmanFord(struct Graph* graph, int source) 
-{
-    	int V = graph->V;
-    	int E = graph->E;
-    	int distance[V];
-    	for (int i = 0; i < V; ++i)
-        	distance[i] = INT_MAX;
-    	distance[source] = 0;
-    	for (int i = 1; i <= V - 1; ++i)
-        	for (int j = 0; j < E; ++j) 
-		{
-            		int u = graph->edge[j].source;
-            		int v = graph->edge[j].destination;
-            		int weight = graph->edge[j].weight;
-            		if (distance[u] != INT_MAX && distance[u] + weight < distance[v])
-                		distance[v] = distance[u] + weight;
-        	}
-    	for (int i = 0; i < E; ++i) 
-	{
-        	int u = graph->edge[i].source;
-        	int v = graph->edge[i].destination;
-        	int weight = graph->edge[i].weight;
-        	if (distance[u] != INT_MAX && distance[u] + weight < distance[v]) 
-		{
-            		printf("Graph contains negative-weight cycle\n");
-            		return;
-        	}
-    	}
-    	printDistance(distance, V);
+void printPath(int s, int v, int pi[]){
+    if(s==v){
+        printf("%d",s);
+        return;
+    }
+    else if(s==pi[v]){
+        printf("%d>%d",s,v);
+        return;
+    }
+    printPath(s,pi[v],pi);
+    printf(">%d",v);
 }
 
-int main() 
-{
-	int V, E, source;
-   	printf("Enter the number of vertices in the graph : ");
-    	scanf("%d", &V);
-    	printf("Enter the number of edges in the graph : ");
-    	scanf("%d", &E);
-	struct Graph* graph = createGraph(V, E);
-	printf("Enter the source vertex : ");
-    	scanf("%d", &source);
-	printf("Enter the source, destination, and weight for each edge :\n");
-    	for (int i = 0; i < E; ++i)
-        	scanf("%d %d %d", &graph->edge[i].source, &graph->edge[i].destination, &graph->edge[i].weight);
-	BellmanFord(graph, source);
+void main(){
+    int n,ed=0,u,v,w;
+    printf("Enter no. of vertices : ");
+    scanf("%d",&n);
+    Edge e[n*(n-1)/2];
+    int dist[n+1], pi[n+1];
+    printf("Enter edges : u v weight (-1 -1 -1 to exit)\n");
+    while(1){
+        printf("Enter : ");
+        scanf("%d %d %d",&u,&v,&w);
+        if(u==-1 && v==-1 && w==-1) break;
+        e[ed].u=u;
+        e[ed].v=v;
+        e[ed++].w=w;
+    }
+    printf("Enter source node : ");
+    scanf("%d",&u);
+    bFord(e,dist,pi,u,n+1,ed);
+    /*printf("\nMin Dist : ");
+    printA(dist,n+1);
+    printf("\nPredecessor : ");
+    printA(pi,n+1);*/
+
+    printf("To Edge\tDist\tPath\n");
+    for(int i=1;i<n+1;i++){
+        printf("%d\t%d\t",i,dist[i]);
+        printPath(u,i,pi);
+        printf("\n");
+    }
 }
