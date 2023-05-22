@@ -1,50 +1,57 @@
-#include <limits.h>
-#include <stdio.h>
-  
-// Matrix Ai has dimension p[i-1] x p[i] for i = 1..n
-int MatrixChainOrder(int p[], int n)
-{
-  
-    /* For simplicity of the program, one extra row and one
-       extra column are allocated in m[][].  0th row and 0th
-       column of m[][] are not used */
-    int m[n][n];
-  
-    int i, j, k, L, q;
-  
-    /* m[i, j] = Minimum number of scalar multiplications needed
-       to compute the matrix A[i]A[i+1]...A[j] = A[i..j] where
-       dimension of A[i] is p[i-1] x p[i] */
-  
-    // cost is zero when multiplying one matrix.
-    for (i = 1; i < n; i++)
-        m[i][i] = 0;
-  
-    // L is chain length.
-    for (L = 2; L < n; L++) {
-        for (i = 1; i < n - L + 1; i++) {
-            j = i + L - 1;
-            m[i][j] = INT_MAX;
-            for (k = i; k <= j - 1; k++) {
-                // q = cost/scalar multiplications
-                q = m[i][k] + m[k + 1][j] + p[i - 1] * p[k] * p[j];
-                if (q < m[i][j])
-                    m[i][j] = q;
-            }
+//ChainMatrixMultiplication
+#include<stdio.h>
+#include<stdlib.h>
+#define MAX 20
+
+int net[MAX][MAX]={0},partition[MAX][MAX]={0};
+
+int netp(int s[],int p, int q){
+    if((p+1)==q) return 0;
+    if(net[p][q]!=0) return net[p][q];
+
+    int min=INT_MAX,minp;
+    for(int k=p+1;k<q;k++){
+        int cur=netp(s,p,k)+netp(s,k,q)+s[p]*s[k]*s[q];
+        if(cur<min){
+            min=cur;
+            minp=k;
         }
     }
-  
-    return m[1][n - 1];
+    net[p][q]=min;
+    partition[p][q]=minp;
+    return min;
 }
-  
-int main()
-{
-    int arr[] = { 1, 2, 3, 4 };
-    int size = sizeof(arr) / sizeof(arr[0]);
-  
-    printf("Minimum number of multiplications is %d ",
-           MatrixChainOrder(arr, size));
-  
-    getchar();
-    return 0;
+
+void printa(int n,int k,int arr[][MAX]){
+    for(int i=0;i<n-1;i++){
+        for(int j=1;j<k;j++)
+            printf("%d\t",arr[i][j]);
+        printf("\n");
+    }
+}
+
+void printdiv(int p,int q){
+    if((p)==q ) printf(" A%d ",p);
+    else{
+        printf("(");
+        printdiv(p,partition[p-1][q]);
+        printdiv(partition[p-1][q]+1,q);
+        printf(")");
+    }
+}
+
+void main(){
+    printf("Enter no. of arrays : ");
+    int n;
+    scanf("%d",&n);
+    n=n+1;
+    int s[n];
+    printf("Enter %d dimensions... \n",n);
+    for(int i=0;i<n;i++)
+        scanf("%d",&s[i]);
+    printf("Min p : %d\n",netp(s,0,n-1));
+    printa(n,n,net);
+    printf("\n////////////////////////////////////////////////////////////////////////\n");
+    printa(n,n,partition);
+    printdiv(1,n-1);
 }
