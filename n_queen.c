@@ -1,60 +1,43 @@
+//NQueens
 #include<stdio.h>
+#include<stdlib.h>
 
-int board[20], count;
+int max, s=0;
 
-void print(int n)
-{
-	int soln[n];
-	printf("\nSolution %d: \n", ++count);
-	printf("   ");
-	for(int i = 1; i <= n; i++) 
-		printf("%d  ", i);
-	for(int i = 1; i <= n; i++) 
-	{
-		printf("\n%d", i);
-		for(int j = 1; j <= n; j++)
-			if(board[i] == j)
-			{
-				printf("  Q");
-				soln[i-1]=j;
-			}
-			else printf("  -");
-	}
-	printf("\n");
-	printf("The solution vector : ");
-	for(int i=0;i<n;i++)
-		printf("%d ",soln[i]);
-	printf("\n");
+void printA(int a[],int n){
+    printf("<");
+    for(int i=1;i<n;i++)
+        printf(" (%d,%d) ",i,a[i]);
+    printf(">");
 }
 
-
-int place(int row, int column) 
-{
-	for(int i = 1; i <= row - 1; i++)
-		if(board[i] == column)
-			return 0;
-		else if(abs(board[i] - column) == abs(i - row))
-			return 0;
-	return 1;
+int place(int x[],int n,int pos){
+    if(n==1) return 1;
+    for(int i=1;i<n;i++)
+        if(pos==x[i] || abs(i-n)==abs(x[i]-pos))
+            return 0;
+    return 1;
 }
 
-void queen(int row, int n) 
-{
-	for(int column = 1; column <= n; column++) 
-		if(place(row, column))
-		{
-			board[row] = column; 
-			if(row == n) 
-				print(n);
-			else
-				queen(row + 1, n);
-		}
+void queenSolve(int x[],int n){
+    for(int i=1;i<=max;i++)
+        if(place(x,n,i)==1){
+            x[n]=i;
+            if(n==max){
+                printf("Soln %d : ",++s);
+                printA(x,max+1);
+                printf("\n");
+            }
+            else
+                queenSolve(x,n+1);
+        }
 }
 
-int main()
-{
-	int n;
-	printf("Enter the number of queens: ");
-	scanf("%d", &n);
-	queen(1, n);
+void main(){
+    int n;
+    printf("Enter no. of queens : ");
+    scanf("%d",&n);
+    int x[n+1];
+    max=n;
+    queenSolve(x,1);
 }
